@@ -20,6 +20,7 @@ package main
 import (
 	"fmt"
 	"os"
+	runtimeDebug "runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
@@ -113,6 +114,8 @@ var (
 		utils.EthRequiredBlocksFlag,
 		utils.LegacyWhitelistFlag, // deprecated
 		utils.BloomFilterSizeFlag,
+		utils.MaxMemoryFlag,
+		utils.GCPercentFlag,
 		utils.CacheFlag,
 		utils.CacheDatabaseFlag,
 		utils.CacheTrieFlag,
@@ -228,6 +231,21 @@ var (
 
 var app = flags.NewApp("the go-ethereum command line interface")
 
+// set max memory used
+func initMemory(ctx *cli.Context) {
+	var maxMemoryGB int = 16
+	if ctx.IsSet(utils.MaxMemoryFlag.Name) {
+		maxMemoryGB = ctx.Int(utils.MaxMemoryFlag.Name)
+	}
+	var percent int = 85
+	if ctx.IsSet(utils.GCPercentFlag.Name) {
+		percent = ctx.Int(utils.GCPercentFlag.Name)
+	}
+	runtimeDebug.SetMemoryLimit(int64(maxMemoryGB) << 30)
+	runtimeDebug.SetGCPercent(percent)
+	log.Warn(fmt.Sprintf("Set max memory limited: %dGB, GC percent: %d", maxMemoryGB, percent))
+}
+
 func init() {
 	// Initialize the CLI app and start Geth
 	app.Action = geth
@@ -304,6 +322,8 @@ func main() {
 // prepare manipulates memory cache allowance and setups metric system.
 // This function should be called before launching devp2p stack.
 func prepare(ctx *cli.Context) {
+	// init memory
+	initMemory(ctx)
 	// If we're running a known preset, log it for convenience.
 	switch {
 	case ctx.IsSet(utils.GoerliFlag.Name):

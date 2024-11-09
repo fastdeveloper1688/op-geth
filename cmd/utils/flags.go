@@ -479,6 +479,19 @@ var (
 		Category: flags.BlobPoolCategory,
 	}
 	// Performance tuning settings
+	// Performance tuning settings
+	MaxMemoryFlag = &cli.IntFlag{
+		Name:     "memory.max",
+		Usage:    "Limit max memory used",
+		Value:    16,
+		Category: flags.PerfCategory,
+	}
+	GCPercentFlag = &cli.IntFlag{
+		Name:     "gc.percent",
+		Usage:    "Set GC percent",
+		Value:    85,
+		Category: flags.PerfCategory,
+	}
 	CacheFlag = &cli.IntFlag{
 		Name:     "cache",
 		Usage:    "Megabytes of memory allocated to internal caching (default = 4096 mainnet full node, 128 light mode)",
